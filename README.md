@@ -1,6 +1,8 @@
 # DWZ ＋ Bootstrap 整合应用（dwz for bootstrap v1.0.0）
 
-2016年DWZ框架会做比较大的升级，准备支持响应式。为了感谢大家多年来的支持，先推出DWZ＋Bootstrap响应式解决方案。
+2016年DWZ框架会做比较大的升级，准备支持响应式。为了感谢大家多年来的支持，现推出DWZ＋Bootstrap响应式临时解决方案。
+
+在线Demo：http://test.dwzteam.com/dwz_bootstrap/
 
 <pre>
 bootstrap + dwz 表单验证，ajax表单提交，在文件上传的表单异步提交，错误提示
