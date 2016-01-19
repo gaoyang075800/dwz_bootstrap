@@ -15,7 +15,7 @@
 
 			// 清除模态窗口缓存
 			$("#"+DWZ.conf.dialogId).on("hidden.bs.modal",function(event){
-				$(this).removeData();
+				$(this).removeData().find('.modal-content').html('');
 				DWZ.alert.close();
 			}).on("loaded.bs.modal",function(event){
 				$(event.target).initUI();

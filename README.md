@@ -12,7 +12,7 @@ bootstrap + dwz 表单验证，ajax表单提交，在文件上传的表单异步
 ajax表单可以写自定义事件
 ajaxDone 这是是定义好的自定义事件，表单提交完成时自动触发的。
 支持绑定自定义ajaxDone事件，dwz.ajaxDone事件绑定一个函数，这个函数开发人员自己定义比较灵活：
-$('xxxForm').bind(DWZ.eventType.ajaxDone, function(json) {
+$('#xxxForm').bind(DWZ.eventType.ajaxDone, function(json) {
   ...
-})
+});
 </pre>
