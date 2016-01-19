@@ -1,0 +1,72 @@
+<ol class="breadcrumb">
+	<li><a href="main.html" data-history="index">首页</a></li>
+	<li class="active">新闻管理</li>
+</ol>
+<ul class="nav nav-tabs" role="tablist">
+	<li role="presentation" class="active"><a href="javascript:">新闻管理</a></li>
+	<li role="presentation"><a href="user/add.html" data-ajax="container">增加新闻</a></li>
+</ul>
+
+<p></p>
+
+<form id="pagerForm" method="post" action="news/index.html" onsubmit="return DWZ.dwzSearch(this)">
+	<input type="hidden" name="pageNum" value="1" />
+	<input type="hidden" name="numPerPage" value="${model.numPerPage}" />
+	<input type="hidden" name="orderField" value="${param.orderField}" />
+	<input type="hidden" name="orderDirection" value="${param.orderDirection}" />
+
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group">
+				<input type="text" name="keywords" class="form-control">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="submit">Search!</button>
+				</span>
+			</div><!-- /input-group -->
+		</div><!-- /.col-lg-6 -->
+	</div><!-- /.row -->
+</form>
+
+<div class="row">
+	<div class="col-md-12">
+		<a href="news/add.html?id={newsIdInput}" data-ajax="container" class="btn btn-default">编辑</a>
+		<a href="./doc/data/ajaxDone_200.html?id={newsIdInput}" data-todo="ajaxTodo" class="btn btn-danger">删除</a>
+	</div>
+</div>
+<div class="table-responsive">
+	<table class="table table-hover datatable dataTable">
+		<thead>
+		<tr>
+			<th>#</th>
+			<th>标题</th>
+			<th>作者</th>
+			<th>发布日期</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr data-target="newsIdInput" data-value="1">
+			<td>1</td>
+			<td>DWZ 富客户端框架开源</td>
+			<td>张慧华</td>
+			<td>2009-10-08</td>
+		</tr>
+		<tr data-target="newsIdInput" data-value="2">
+			<td>2</td>
+			<td>DWZ for bootstrap v1.0.0</td>
+			<td>张慧华</td>
+			<td>2016-01-20</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<div class="pagination" totalCount="200" numPerPage="20" pageNumShown="5" currentPage="1"></div>
+
+<script>
+	DWZ.regPlugins.push(function($p){
+		// 自定义绑定ajaxDone事件，如果不绑定默认会寻找pagerForm然后重新加载列表页面
+		$("a[data-todo=ajaxTodo]", $p).bind(DWZ.eventType.ajaxDone, function(event, json){
+			alert('statusCode: '+json[DWZ.keys.statusCode]);
+		});;
+	});
+</script>

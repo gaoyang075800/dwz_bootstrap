@@ -1,0 +1,38 @@
+
+<form method="post" action="../doc/ajaxDone_200_dialog.html" class="required-validate">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<h4 class="modal-title">修改用户信息</h4>
+	</div>
+	<div class="modal-body">
+
+		<div class="form-group">
+			<label for="input-nickname">昵称</label>
+			<input type="text" name="nickname" class="form-control" id="input-nickname" placeholder="昵称" required minlength="2" maxlength="20">
+			<div class="help-block with-errors"></div>
+		</div>
+		<div class="form-group">
+			<label for="exampleInputGender">性别</label>
+			<select name="gender" id="exampleInputGender" required="required">
+				<option value="">请选择</option>
+				<option value="1">男</option>
+				<option value="0">女</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label for="input-mobile">手机</label>
+			<input type="tel" name="mobile" class="form-control" id="input-mobile" placeholder="手机" required minlength="11" maxlength="20" data-error="手机号非法">
+			<div class="help-block with-errors"></div>
+		</div>
+		<div class="form-group">
+			<label for="input-email">邮箱</label>
+			<input type="email" name="email" class="form-control" id="input-email" placeholder="邮箱" required maxlength="100" data-error="邮箱非法">
+			<div class="help-block with-errors"></div>
+		</div>
+
+	</div>
+	<div class="modal-footer">
+		<button type="submit" class="btn btn-primary" data-loading-text="Loading...">提交</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+	</div>
+</form>
