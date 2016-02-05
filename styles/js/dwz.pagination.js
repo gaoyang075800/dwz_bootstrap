@@ -88,7 +88,7 @@
 				for (var i=interval.start; i<interval.end;i++){
 					pageNumFrag += setting.pageNumFrag.replaceAll("#pageNum#", i).replaceAll("#liClass#", i==pc.getCurrentPage() ? 'active j-num' : 'j-num');
 				}
-				$this.html(setting.pagination.replaceAll("#pageNumFrag#", pageNumFrag).replaceAll("#currentPage#", pc.getCurrentPage()));
+				$this.html(setting.pagination.replaceAll("#pageNumFrag#", pageNumFrag).replaceAll("#currentPage#", pc.getCurrentPage())).removeClass('pagination');
 	
 				var $first = $this.find(setting.first$);
 				var $prev = $this.find(setting.prev$);

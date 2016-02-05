@@ -15,8 +15,7 @@
 
 			// 清除模态窗口缓存
 			$("#"+DWZ.conf.dialogId).on("hidden.bs.modal",function(event){
-				$(this).removeData().find('.modal-content').html('');
-				DWZ.alert.close();
+				$(this).removeData('bs.modal').find('.modal-content').html('');
 			}).on("loaded.bs.modal",function(event){
 				$(event.target).initUI();
 			});
@@ -77,93 +76,74 @@
 			var $form = $(this).bind(DWZ.eventType.ajaxDone, function(event, json){
 				if (json[DWZ.keys.statusCode] == DWZ.statusCode.ok){
 					// pagerForm
-					if (DWZ.dwzPageBreak) DWZ.dwzPageBreak({rel: json.dialog ? DWZ.conf.containerId : ''}, event);
+					if (DWZ.dwzPageBreak) DWZ.dwzPageBreak({rel: json.dialog ? '' : DWZ.conf.containerId }, event);
 				}
 			});
+			var form = $form[0];
 
-			$form.validate({
-				onsubmit: true,
-				focusInvalid: false,
-				focusCleanup: true,
-				errorElement: "span",
-				ignore:".ignore",
-				invalidHandler: function(form, validator) {
-					//KindEditor.sync(".richeditor");
-					var errors = validator.numberOfInvalids();
-					if (errors) {
-						var message = DWZ.msg("validateFormError",[errors]);
-						DWZ.alert.error(message);
-					}
-				},
-				highlight : function(element) {
-					$(element).closest('.form-group').addClass('has-error');
-				},
+			$form.validator({
+				errors: {
+					minlength: '长度不够'
+				}
+			}).on('submit', function (event) {
+				if (event.isDefaultPrevented()) {
+					// handle the invalid form...
+					var message = DWZ.msg("validateFormError", [$form.find('.has-error').size()]);
+					DWZ.alert.error(message);
+				} else {
+					// everything looks good!
+					DWZ.alert.close();
 
-				success : function(label) {
-					label.closest('.form-group').removeClass('has-error');
-					label.remove();
-				},
+					if ($form.find(':file').size() == 0) { // ajax表单异步提交
 
-				errorPlacement : function(error, element) {
-					element.parent('div').append(error);
-				},
-
-				submitHandler : function(form, event) {
-					//KindEditor.sync(".richeditor");
-					if ($form.valid()) {
-						DWZ.alert.close();
-
-						if ($form.find(':file').size() == 0) { // ajax表单异步提交
-
-							$.ajax({
-								type: form.method || 'POST',
-								url:$form.attr("action"),
-								data:$form.serializeArray(),
-								dataType:"json",
-								cache: false,
-								success: function(json){
-									DWZ.ajaxDone(json, event);
-
-								},
-								error: DWZ.ajaxError
-							});
-
-						} else { // 含文件上传的表单，使用iframe模拟异步提交
-							var $iframe = $("#callbackframe");
-							if ($iframe.size() == 0) {
-								$iframe = $("<iframe id='callbackframe' name='callbackframe' src='about:blank' style='display:none'></iframe>").appendTo("body");
-							}
-							if(!form.ajax) {
-								$form.append('<input type="hidden" name="ajax" value="1" />');
-							}
-							form.target = "callbackframe";
-
-							$form.attr('enctype', 'multipart/form-data');
-
-							_iframeResponse($iframe[0], function(json){
+						$.ajax({
+							type: form.method || 'POST',
+							url:$form.attr("action"),
+							data:$form.serializeArray(),
+							dataType:"json",
+							cache: false,
+							success: function(json){
 								DWZ.ajaxDone(json, event);
-							});
-							form.submit();
+
+							},
+							error: DWZ.ajaxError
+						});
+
+					} else { // 含文件上传的表单，使用iframe模拟异步提交
+						var $iframe = $("#callbackframe");
+						if ($iframe.size() == 0) {
+							$iframe = $("<iframe id='callbackframe' name='callbackframe' src='about:blank' style='display:none'></iframe>").appendTo("body");
 						}
 
+						var url = $form.attr('action');
+						if (url && url.indexOf('ajax=1')==-1){
+							url = url + (url.indexOf('?')==-1 ? '?ajax=1' : '&ajax=1');
+							$form.attr('action', url);
+						}
+
+						form.target = "callbackframe";
+
+						$form.attr('enctype', 'multipart/form-data');
+
+						_iframeResponse($iframe[0], function(json){
+							DWZ.ajaxDone(json, event);
+						});
+						form.submit();
 					}
-					return false;
+
+					DWZ.globalLoging.show();
 				}
+
+				return false;
 			});
 
-			$form.find('input[customvalid]').each(function(){
-				var $input = $(this);
-				$input.rules("add", {
-					customvalid: $input.attr("customvalid")
-				});
-			});
 		});
 	}
 
 	// 自动追加到DWZ.initUI()
 	DWZ.regPlugins.push(function($p){
 		//validate form
-		if ($.fn.validate) _formValidate($p);
+		if ($.fn.validator) _formValidate($p);
 
 		$('button[data-loading-text], a[data-loading-text]').on('click', function () {
 			window.currentLoadingBtn = $(this);
@@ -202,7 +182,15 @@
 					return false;
 				}
 
-				$("#"+rel).loadUrl(url);
+				if ($this.attr('data-loading-text')) {
+					$this.button('loading');
+					$("#"+rel).ajaxUrl({url:url, data:{}, completeFn:function(){
+						$this.button('reset');
+					}});
+				} else {
+					$("#"+rel).loadUrl(url);
+				}
+
 				event.preventDefault();
 			});
 		});
@@ -224,34 +212,44 @@
 		if ($.fn.tableDB) $('table.table', $p).tableDB();
 		if ($.fn.ajaxTodo) $("a[data-todo=ajaxTodo]", $p).ajaxTodo();
 		if ($.fn.dwzExport) $("a[data-todo=dwzExport]", $p).dwzExport();
-
+		if ($.fn.selectRef) $("select[data-ref]", $p).selectRef();
 
 		if ($.fn.xheditor){
-//			var options = {
-//	        filterMode : true,
-//	        uploadJson : "/components/kindeditor/upload.jhtml",
-//	        allowFileManager : true,
-//	        afterBlur: function(){this.sync();},
-//	        afterCreate : function() {this.sync();},
-//	        items : [
-//	         		'source', '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'code', 'cut', 'copy', 'paste',
-//	         		'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright',
-//	         		'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript',
-//	         		'superscript', 'clearhtml', 'quickformat', 'selectall', '|', 'fullscreen', '/',
-//	         		'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
-//	         		'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image',
-//	         		'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'baidumap', 'pagebreak',
-//	         		'anchor', 'link', 'unlink', '|', 'about'
-//	         	],
-//	         	urlType:"relative"
-//			};
-			//KindEditor.create('.richeditor', options);
-			var option = {upBtnText:'上传图片',upImgUrl:'/xheditor/upload',upImgExt:'jpg,jpeg,gif,png',html5Upload:false};
-			$("textarea.editor", $p).xheditor(option);
+			$("textarea.editor", $p).each(function(){
+				var $this = $(this);
+				var op = {html5Upload:false, skin: 'vista',tools: $this.attr("data-tools") || 'full'};
+				var upAttrs = [
+					["upLinkUrl","upLinkExt","zip,rar,txt"],
+					["upImgUrl","upImgExt","jpg,jpeg,gif,png"],
+					["upFlashUrl","upFlashExt","swf"],
+					["upMediaUrl","upMediaExt","avi"]
+				];
 
+				$(upAttrs).each(function(i){
+					var urlAttr = upAttrs[i][0];
+					var extAttr = upAttrs[i][1];
+
+					if ($this.attr(urlAttr)) {
+						op[urlAttr] = $this.attr(urlAttr);
+						op[extAttr] = $this.attr(extAttr) || upAttrs[i][2];
+					}
+				});
+				$this.css('height', '200px');
+				$this.xheditor(op);
+			});
 		}
 
-		// bootstrap-datetimepicker
+		/**
+		 * http://www.bootcss.com/p/bootstrap-datetimepicker/
+		 *
+		 * <input class="date form_datetime" type="text" value="2012-05-15 21:05" data-date-format="yyyy-mm-dd hh:ii">
+		 *
+		 * <div class="input-append date form_date" data-date="12-02-2012" data-date-format="dd-mm-yyyy">
+		 *     <input size="16" type="text" value="12-02-2012" readonly>
+		 *      <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+		 *		<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+		 * </div>
+		 */
 		if ($.fn.datetimepicker) {
 			$('.form_datetime', $p).datetimepicker({
 				weekStart: 1,

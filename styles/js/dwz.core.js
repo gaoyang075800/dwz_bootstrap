@@ -1,5 +1,5 @@
 /**
- * Created by huihuazhang on 14-10-10.
+ * Created by z@j-ui.com on 14-10-10.
  */
 
 (function($){
